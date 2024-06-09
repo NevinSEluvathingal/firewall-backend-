@@ -5,11 +5,17 @@ import (
 	"hello/models"
 	"hello/models/db"
 	"hello/utils"
+	"net"
 	"net/http"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+)
+
+const (
+	NetworkIP   = "192.168.1.0"
+	NetworkMask = "24"
 )
 
 func main() {
@@ -78,9 +84,34 @@ func Barinfo(context *gin.Context) {
 	}
 	context.JSON(http.StatusOK, gin.H{"Bar": BarDetails})
 }
+func getUserIP(r *http.Request) string {
+	// Check if the request is behind a proxy
+	if ip := r.Header.Get("X-Forwarded-For"); ip != "" {
+		// Return the first IP in the list
+		return ip
+	}
+	// Remove the port number if present
+	ip, _, _ := net.SplitHostPort(r.RemoteAddr)
+	return ip
+}
+
+// isSameNetwork checks if the userIP is within the defined network range.
+func isSameNetwork(userIP, networkIP, networkMask string) bool {
+	_, ipnet, err := net.ParseCIDR(networkIP + "/" + networkMask)
+	if err != nil {
+		return false
+	}
+
+	userIPAddr := net.ParseIP(userIP)
+	return ipnet.Contains(userIPAddr)
+}
 
 func signin(contest *gin.Context) {
 	var user models.Users
+	userID := getUserIP(contest.Request)
+	if !isSameNetwork(userID, NetworkIP, NetworkMask) {
+		contest.JSON(http.StatusOK, gin.H{"message": "User is on the same network"})
+	}
 	contest.ShouldBindJSON(&user)
 	err := user.Validate()
 

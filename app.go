@@ -61,6 +61,11 @@ func userinfo(context *gin.Context) {
 func signup(contest *gin.Context) {
 	var user models.Users
 	contest.ShouldBindJSON(&user)
+	error := models.Check(user)
+	if error != nil {
+		contest.JSON(http.StatusUnauthorized, gin.H{"message": "existing"})
+		return
+	}
 	err := user.Save()
 
 	if err != nil {
@@ -116,14 +121,14 @@ func signin(contest *gin.Context) {
 	err := user.Validate()
 
 	if err != nil {
-		contest.JSON(http.StatusUnauthorized, gin.H{"message": "invalid credentials"})
+		contest.JSON(http.StatusUnauthorized, gin.H{"message": "invalid"})
 		return
 
 	}
 	token, err := utils.GenerateToken(user.Mail, user.Username)
 
 	if err != nil {
-		contest.JSON(http.StatusInternalServerError, gin.H{"message": "could not"})
+		contest.JSON(http.StatusInternalServerError, gin.H{"message": "ise"}) //ise stands for internal server error
 		return
 
 	}

@@ -90,17 +90,13 @@ func Barinfo(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{"Bar": BarDetails})
 }
 func getUserIP(r *http.Request) string {
-	// Check if the request is behind a proxy
 	if ip := r.Header.Get("X-Forwarded-For"); ip != "" {
-		// Return the first IP in the list
 		return ip
 	}
-	// Remove the port number if present
 	ip, _, _ := net.SplitHostPort(r.RemoteAddr)
 	return ip
 }
 
-// isSameNetwork checks if the userIP is within the defined network range.
 func isSameNetwork(userIP, networkIP, networkMask string) bool {
 	_, ipnet, err := net.ParseCIDR(networkIP + "/" + networkMask)
 	if err != nil {

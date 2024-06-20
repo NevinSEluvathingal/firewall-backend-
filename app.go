@@ -58,6 +58,7 @@ func userinfo(context *gin.Context) {
 	fmt.Printf("\n%s\n", info)
 	context.JSON(http.StatusOK, gin.H{"userinfo": info})
 }
+
 func signup(contest *gin.Context) {
 	var user models.Users
 	userIP := getUserIP(contest.Request)
@@ -77,19 +78,22 @@ func signup(contest *gin.Context) {
 
 	contest.JSON(http.StatusOK, gin.H{"message": "event created....i mean entered to database"})
 }
+
 func Barinfo(context *gin.Context) {
 	var BarDetails models.Bar
+	userip := getUserIP(context.Request)
 	email := context.Query("email")
 	if email == "" {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "email is empty"})
 	}
-	BarDetails, err := models.Bardetails(email)
+	BarDetails, err := models.Bardetails(email, userip)
 	if err != nil {
 		context.JSON(http.StatusUnauthorized, gin.H{"message": "bar details error"})
 		return
 	}
 	context.JSON(http.StatusOK, gin.H{"Bar": BarDetails})
 }
+
 func getUserIP(r *http.Request) string {
 	if ip := r.Header.Get("X-Forwarded-For"); ip != "" {
 		return ip

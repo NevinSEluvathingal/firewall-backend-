@@ -60,13 +60,14 @@ func userinfo(context *gin.Context) {
 }
 func signup(contest *gin.Context) {
 	var user models.Users
+	userIP := getUserIP(contest.Request)
 	contest.ShouldBindJSON(&user)
 	error := models.Check(user)
 	if error != nil {
 		contest.JSON(http.StatusUnauthorized, gin.H{"message": "existing"})
 		return
 	}
-	err := user.Save()
+	err := user.Save(userIP)
 
 	if err != nil {
 		contest.JSON(http.StatusUnauthorized, gin.H{"message": "could not save"})

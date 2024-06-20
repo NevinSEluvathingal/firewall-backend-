@@ -20,9 +20,9 @@ type Bar struct {
 	Dec   int
 }
 
-func Bardetails(email string) (Bar, error) {
-	query := "SELECT jan, feb, march, april, may, june, july, aug, sept, oct, nov, dec FROM users WHERE mail = ?"
-	row := db.DB.QueryRow(query, email)
+func Bardetails(email string, ip string) (Bar, error) {
+	query := "SELECT jan, feb, march, april, may, june, july, aug, sept, oct, nov, dec FROM users WHERE mail = ? and ip=?"
+	row := db.DB.QueryRow(query, email, ip)
 	var value Bar
 	err := row.Scan(
 		&value.Jan, &value.Feb, &value.Mar, &value.April, &value.May, &value.June,
